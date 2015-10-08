@@ -9,6 +9,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import javax.swing.JFrame;
 import com.jeffstanton.rain.graphics.Screen;
+import com.jeffstanton.rain.input.Keyboard;
 
 public class Game extends Canvas implements Runnable {
 	private static final long serialVersionUID = 1L;
@@ -17,9 +18,13 @@ public class Game extends Canvas implements Runnable {
 	public static int HEIGHT = WIDTH / 16 * 9;
 	public static int SCALE = 3;
 	public static String title = "Rain";
+	// Used to make the game map loop
+	private int xOffSet = 0;
+	private int yOffSet = 0;
 	
 	private Thread gameThread;
 	private JFrame frame;
+	private Keyboard key;
 	private boolean running = false;  // Indicate the game is running
 	
 	private Screen screen;
@@ -38,11 +43,15 @@ public class Game extends Canvas implements Runnable {
 		// Create a new screen
 		screen = new Screen(WIDTH, HEIGHT);
 		
+		// Create a new Keyboard, add keyboard listener
+		key = new Keyboard();
+		addKeyListener(key);
+		
 		// Create a new Window, center it, and make it visible
 		frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setLocationRelativeTo(null);
-		frame.setVisible(true);		
+		frame.setVisible(true);	
 	} // end Constructor
 	
 	// Start the game
@@ -98,7 +107,12 @@ public class Game extends Canvas implements Runnable {
 	}  // end run
 	
 	public void update() {
-		
+		// Move map according to user input
+		key.update();
+		if (key.up) yOffSet--;
+		if (key.down) yOffSet++;
+		if (key.left) xOffSet--;
+		if (key.right) xOffSet++;
 	}  // end update
 	
 	public void render() {
@@ -110,7 +124,8 @@ public class Game extends Canvas implements Runnable {
 		
 		// Clear the screen, render the image, and then display the image
 		screen.clear();
-		screen.render();
+		// Move the map horizontally
+		screen.render(xOffSet, yOffSet);
 		
 		// Copy pixels
 		for (int i = 0; i < pixels.length; i++) {
